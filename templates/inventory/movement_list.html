@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Движение товаров - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-arrow-left-right"></i> Движение товаров на складе
+            </h1>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">История движений</h5>
+            <a href="{% url 'inventory:movement_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Добавить операцию
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Комплектующая</th>
+                            <th>Тип операции</th>
+                            <th>Количество</th>
+                            <th>Пользователь</th>
+                            <th>Примечание</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for movement in movements %}
+                            <tr>
+                                <td>{{ movement.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'inventory:component_detail' movement.component.pk %}">
+                                        {{ movement.component.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if movement.movement_type == 'in' %}
+                                        <span class="badge bg-success">{{ movement.get_movement_type_display }}</span>
+                                    {% elif movement.movement_type == 'out' %}
+                                        <span class="badge bg-danger">{{ movement.get_movement_type_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-info">{{ movement.get_movement_type_display }}</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ movement.quantity }}</strong></td>
+                                <td>{{ movement.user.username|default:"—" }}</td>
+                                <td>{{ movement.note|truncatewords:10|default:"—" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Нет операций</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

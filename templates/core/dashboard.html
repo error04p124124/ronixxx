@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+
+{% block title %}Панель управления - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-speedometer2"></i> Панель управления
+            </h1>
+            <p class="lead">Добро пожаловать, {{ user.get_full_name|default:user.username }}! 
+                <span class="badge bg-primary">{{ user.get_role_display }}</span>
+            </p>
+        </div>
+    </div>
+    
+    {% if user.is_client %}
+        <!-- Панель клиента -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Всего заявок</h6>
+                                <p class="stat-value mb-0">{{ total_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-clipboard-check stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Активных заявок</h6>
+                                <p class="stat-value mb-0">{{ active_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-hourglass-split stat-icon text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Быстрые действия для клиента -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Быстрые действия</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'orders:order_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Создать заявку
+                            </a>
+                            <a href="{% url 'orders:order_list' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-list"></i> Мои заявки
+                            </a>
+                            <a href="{% url 'orders:receipt_list' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-receipt"></i> Мои чеки
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Мои заявки</h5>
+                        <a href="{% url 'orders:order_create' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle"></i> Создать заявку
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if my_orders %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Тип</th>
+                                            <th>Статус</th>
+                                            <th>Дата</th>
+                                            <th>Сумма</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in my_orders %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.get_order_type_display }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ order.status|default:'secondary' }}">
+                                                        {{ order.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                                <td>{{ order.total_amount }} ₽</td>
+                                                <td>
+                                                    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">
+                                                        Подробнее
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">У вас пока нет заявок.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% elif user.is_worker %}
+        <!-- Панель работника -->
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Новые заявки</h6>
+                                <p class="stat-value mb-0">{{ new_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-exclamation-circle stat-icon text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Низкий остаток</h6>
+                                <p class="stat-value mb-0">{{ low_stock_items|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-exclamation-triangle stat-icon text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Мои задачи</h6>
+                                <p class="stat-value mb-0">{{ assigned_orders|length|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-person-check stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Назначенные мне заявки</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if assigned_orders %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Клиент</th>
+                                            <th>Тип</th>
+                                            <th>Статус</th>
+                                            <th>Дата</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in assigned_orders %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.client.get_full_name|default:order.client.username }}</td>
+                                                <td>{{ order.get_order_type_display }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ order.status }}">
+                                                        {{ order.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                                <td>
+                                                    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">
+                                                        Подробнее
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Нет назначенных заявок.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Быстрые действия для работника -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Быстрые действия</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'inventory:component_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Добавить комплектующую
+                            </a>
+                            <a href="{% url 'inventory:movement_create' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-left-right"></i> Движение товара
+                            </a>
+                            <a href="{% url 'orders:order_list' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-list"></i> Все заявки
+                            </a>
+                            <a href="{% url 'reports:home' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-file-earmark-text"></i> Отчёты
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% elif user.is_superuser %}
+        <!-- Панель управляющего -->
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Всего заявок</h6>
+                                <p class="stat-value mb-0">{{ total_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-clipboard-check stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Новые</h6>
+                                <p class="stat-value mb-0 text-info">{{ new_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-exclamation-circle stat-icon text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">В работе</h6>
+                                <p class="stat-value mb-0 text-warning">{{ in_progress_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-hourglass-split stat-icon text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Выполнено</h6>
+                                <p class="stat-value mb-0 text-success">{{ completed_orders|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-check-circle stat-icon text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Комплектующих на складе</h6>
+                                <p class="stat-value mb-0">{{ total_components|default:0 }}</p>
+                            </div>
+                            <i class="bi bi-box-seam stat-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card stat-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted">Общая выручка</h6>
+                                <p class="stat-value mb-0 text-success">{{ total_revenue|default:0 }} ₽</p>
+                            </div>
+                            <i class="bi bi-currency-dollar stat-icon text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Последние заявки</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_orders %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>№</th>
+                                            <th>Клиент</th>
+                                            <th>Тип</th>
+                                            <th>Статус</th>
+                                            <th>Ответственный</th>
+                                            <th>Дата</th>
+                                            <th>Сумма</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for order in recent_orders %}
+                                            <tr>
+                                                <td>{{ order.id }}</td>
+                                                <td>{{ order.client.get_full_name|default:order.client.username }}</td>
+                                                <td>{{ order.get_order_type_display }}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ order.status }}">
+                                                        {{ order.get_status_display }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ order.assigned_to.username|default:"Не назначен" }}</td>
+                                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                                <td>{{ order.total_amount }} ₽</td>
+                                                <td>
+                                                    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">
+                                                        Подробнее
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Нет заявок.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Быстрые действия для управляющего -->
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Быстрые действия</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{% url 'inventory:component_create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Добавить комплектующую
+                            </a>
+                            <a href="{% url 'inventory:movement_create' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-left-right"></i> Движение товара
+                            </a>
+                            <a href="{% url 'orders:order_list' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-list"></i> Все заявки
+                            </a>
+                            <a href="{% url 'reports:home' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-file-earmark-text"></i> Отчёты
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

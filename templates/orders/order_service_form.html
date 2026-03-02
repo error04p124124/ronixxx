@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Добавление услуги - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.08);">
+                <div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 2px solid #dee2e6;">
+                    <h3 class="mb-0" style="color: #1a1a1a;">
+                        <i class="bi bi-tools"></i> Добавление услуги в заявку #{{ order.id }}
+                    </h3>
+                </div>
+                <div class="card-body p-4" style="background: #ffffff;">
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> <strong>Цена:</strong> Будет автоматически взята из прайс-листа услуг
+                    </div>
+                    
+                    <form method="post" id="serviceForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.service.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">
+                                <i class="bi bi-tools"></i> Выберите услугу:
+                            </label>
+                            {{ form.service }}
+                            {% if form.service.errors %}
+                                <div class="text-danger mt-1">{{ form.service.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Доступные услуги из прайс-листа</small>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">
+                                    <i class="bi bi-hash"></i> Количество:
+                                </label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                    <div class="text-danger mt-1">{{ form.quantity.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Для услуги "Прочее" - количество часов работы</small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">
+                                    <i class="bi bi-currency-dollar"></i> Цена за единицу:
+                                </label>
+                                {{ form.price }}
+                                {% if form.price.errors %}
+                                    <div class="text-danger mt-1">{{ form.price.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Заполнится автоматически при сохранении (из прайс-листа)</small>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; border: none; padding: 0.625rem 1.5rem; font-weight: 500;">
+                                <i class="bi bi-check-circle"></i> Добавить услугу
+                            </button>
+                            <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary" style="border-color: #6c757d; color: #495057; font-weight: 500;">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

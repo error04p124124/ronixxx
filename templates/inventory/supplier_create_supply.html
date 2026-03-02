@@ -1,0 +1,295 @@
+{% extends 'base.html' %}
+
+{% block title %}Заказ поставки от {{ supplier.name }} - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_list' %}">Поставщики</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'inventory:supplier_detail' supplier.pk %}">{{ supplier.name }}</a></li>
+                    <li class="breadcrumb-item active">Заказ поставки</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-truck"></i> Заказ поставки
+            </h1>
+            <p class="text-muted">Поставщик: <strong>{{ supplier.name }}</strong></p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Информация о поставщике</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Компания:</strong> {{ supplier.name }}</p>
+                    <p><strong>Контактное лицо:</strong> {{ supplier.contact_person }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Email:</strong> {{ supplier.email }}</p>
+                    <p><strong>Телефон:</strong> {{ supplier.phone }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 2px solid #dee2e6;">
+            <h5 class="mb-0" style="color: #2c3e50; font-weight: 600;">
+                <i class="bi bi-box-seam"></i> Комплектующие для поставки
+            </h5>
+        </div>
+        <div class="card-body">
+            <form method="post" id="supplyForm">
+                {% csrf_token %}
+                
+                <div class="alert" style="background-color: #f8f9fa; border-left: 4px solid #6c757d; color: #2c3e50;">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Инструкция:</strong> Выберите комплектующие и укажите количество для каждой позиции. Используйте кнопку "+" для добавления новых строк.
+                </div>
+                
+                <div class="mb-3 text-end">
+                    <button type="button" class="btn btn-dark btn-sm" id="addRowBtn">
+                        <i class="bi bi-plus-circle"></i> Добавить строку
+                    </button>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover" id="itemsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 48%;">Комплектующая</th>
+                                <th style="width: 20%;">Текущий остаток</th>
+                                <th style="width: 22%;">Количество для поставки</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <tr class="item-row" data-row="0">
+                                <td class="align-middle text-center row-number">1</td>
+                                <td>
+                                    <select name="component_0" class="form-select component-select" data-row="0">
+                                        <option value="">-- Выберите комплектующую --</option>
+                                        {% for component in components %}
+                                            <option value="{{ component.id }}" 
+                                                    data-quantity="{{ component.quantity }}"
+                                                    data-min-quantity="{{ component.min_quantity }}"
+                                                    data-category="{{ component.category.name }}">
+                                                {{ component.name }} ({{ component.article_number }}) - {{ component.category.name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="align-middle">
+                                    <span class="stock-info-0 text-muted">-</span>
+                                </td>
+                                <td>
+                                    <input type="number" 
+                                           name="quantity_0" 
+                                           class="form-control quantity-input" 
+                                           min="1" 
+                                           placeholder="0">
+                                </td>
+                                <td class="align-middle text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-row-btn" title="Удалить строку" style="display: none;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="note" class="form-label">Примечание</label>
+                    <textarea name="note" id="note" class="form-control" rows="3" placeholder="Дополнительная информация о поставке..."></textarea>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'inventory:supplier_detail' supplier.pk %}" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Назад
+                    </a>
+                    <button type="submit" class="btn btn-dark btn-lg">
+                        <i class="bi bi-check-circle"></i> Оформить поставку
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.item-row:hover {
+    background-color: #f8f9fa;
+}
+
+.component-select {
+    font-size: 0.9rem;
+}
+
+.stock-info {
+    font-weight: bold;
+}
+
+.stock-low {
+    color: #dc3545 !important;
+    font-weight: bold;
+}
+
+.stock-ok {
+    color: #6c757d !important;
+    font-weight: bold;
+}
+
+.remove-row-btn {
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.remove-row-btn:hover {
+    opacity: 1;
+}
+
+#addRowBtn {
+    white-space: nowrap;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let rowCounter = 1; // Начинаем с 1, т.к. первая строка уже есть
+    
+    // Функция для обновления номеров строк
+    function updateRowNumbers() {
+        document.querySelectorAll('.item-row').forEach(function(row, index) {
+            row.querySelector('.row-number').textContent = index + 1;
+        });
+        
+        // Показываем/скрываем кнопки удаления
+        const removeButtons = document.querySelectorAll('.remove-row-btn');
+        if (removeButtons.length > 1) {
+            removeButtons.forEach(btn => btn.style.display = 'inline-block');
+        } else if (removeButtons.length === 1) {
+            removeButtons[0].style.display = 'none';
+        }
+    }
+    
+    // Функция для обработки изменения выбора комплектующей
+    function setupComponentSelect(select) {
+        select.addEventListener('change', function() {
+            const row = this.dataset.row;
+            const selectedOption = this.options[this.selectedIndex];
+            const stockInfoEl = document.querySelector('.stock-info-' + row);
+            
+            if (selectedOption.value) {
+                const quantity = parseInt(selectedOption.dataset.quantity);
+                const minQuantity = parseInt(selectedOption.dataset.minQuantity);
+                
+                let stockClass = 'stock-ok';
+                let stockText = 'В наличии';
+                
+                if (quantity === 0) {
+                    stockClass = 'stock-low';
+                    stockText = 'Отсутствует';
+                } else if (quantity <= minQuantity) {
+                    stockClass = 'stock-low';
+                    stockText = 'Низкий остаток';
+                }
+                
+                stockInfoEl.innerHTML = `<span class="${stockClass}">${quantity} шт. - ${stockText}</span>`;
+                
+                // Автофокус на поле количества
+                const quantityInput = this.closest('tr').querySelector('.quantity-input');
+                quantityInput.focus();
+            } else {
+                stockInfoEl.innerHTML = '-';
+            }
+        });
+    }
+    
+    // Инициализируем первую строку
+    setupComponentSelect(document.querySelector('.component-select'));
+    
+    // Добавление новой строки
+    document.getElementById('addRowBtn').addEventListener('click', function() {
+        const tbody = document.getElementById('itemsTableBody');
+        const firstRow = tbody.querySelector('.item-row');
+        const newRow = firstRow.cloneNode(true);
+        
+        // Обновляем атрибуты новой строки
+        newRow.dataset.row = rowCounter;
+        
+        // Обновляем select
+        const newSelect = newRow.querySelector('.component-select');
+        newSelect.name = `component_${rowCounter}`;
+        newSelect.dataset.row = rowCounter;
+        newSelect.value = '';
+        
+        // Обновляем input количества
+        const newQuantityInput = newRow.querySelector('.quantity-input');
+        newQuantityInput.name = `quantity_${rowCounter}`;
+        newQuantityInput.value = '';
+        
+        // Обновляем span с информацией о складе
+        const newStockInfo = newRow.querySelector('[class^="stock-info-"]');
+        newStockInfo.className = `stock-info-${rowCounter} text-muted`;
+        newStockInfo.innerHTML = '-';
+        
+        // Показываем кнопку удаления
+        const removeBtn = newRow.querySelector('.remove-row-btn');
+        removeBtn.style.display = 'inline-block';
+        
+        // Добавляем строку в таблицу
+        tbody.appendChild(newRow);
+        
+        // Настраиваем обработчики для новой строки
+        setupComponentSelect(newSelect);
+        
+        // Обновляем счетчик и номера строк
+        rowCounter++;
+        updateRowNumbers();
+    });
+    
+    // Удаление строки
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.remove-row-btn')) {
+            const row = e.target.closest('.item-row');
+            const tbody = document.getElementById('itemsTableBody');
+            
+            // Не даем удалить последнюю строку
+            if (tbody.querySelectorAll('.item-row').length > 1) {
+                row.remove();
+                updateRowNumbers();
+            }
+        }
+    });
+    
+    // Валидация формы перед отправкой
+    document.getElementById('supplyForm').addEventListener('submit', function(e) {
+        let hasItems = false;
+        
+        document.querySelectorAll('.component-select').forEach(function(select) {
+            if (select.value) {
+                const row = select.closest('tr');
+                const quantityInput = row.querySelector('.quantity-input');
+                if (quantityInput.value && parseInt(quantityInput.value) > 0) {
+                    hasItems = true;
+                }
+            }
+        });
+        
+        if (!hasItems) {
+            e.preventDefault();
+            alert('Добавьте хотя бы одну позицию для поставки!');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

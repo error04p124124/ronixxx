@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Чек № {{ receipt.receipt_number }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'DejaVu Sans', 'Arial', sans-serif;
+            font-size: 10pt;
+            line-height: 1.5;
+            color: #000;
+        }
+        .receipt-container {
+            max-width: 180mm;
+            margin: 0 auto;
+        }
+        /* Шапка */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+        }
+        .company-name {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+        .company-details {
+            font-size: 8pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        /* Заголовок чека */
+        .receipt-title {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .receipt-title h1 {
+            font-size: 13pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .receipt-number {
+            font-size: 11pt;
+            color: #333;
+        }
+        /* Информационная таблица */
+        .info-section {
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        .info-row {
+            display: table;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        .info-label {
+            display: table-cell;
+            width: 150px;
+            font-weight: bold;
+        }
+        .info-value {
+            display: table-cell;
+        }
+        /* Таблица товаров */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 9.5pt;
+        }
+        .items-table th {
+            background-color: #e8e8e8;
+            border: 1px solid #000;
+            padding: 8px 6px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .items-table td {
+            border: 1px solid #000;
+            padding: 8px 6px;
+        }
+        .items-table .col-num {
+            width: 30px;
+            text-align: center;
+        }
+        .items-table .col-name {
+            text-align: left;
+        }
+        .items-table .col-qty {
+            width: 70px;
+            text-align: right;
+        }
+        .items-table .col-price {
+            width: 85px;
+            text-align: right;
+        }
+        .items-table .col-sum {
+            width: 95px;
+            text-align: right;
+        }
+        .items-table .item-article {
+            font-size: 8pt;
+            color: #666;
+        }
+        .items-table tfoot td {
+            background-color: #f5f5f5;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+        /* Примечания */
+        .notes-section {
+            background-color: #fffbf0;
+            border-left: 3px solid #ffc107;
+            padding: 10px;
+            margin: 15px 0;
+            font-size: 9pt;
+        }
+        /* Подвал */
+        .footer {
+            margin-top: 30px;
+            padding-top: 12px;
+            border-top: 1px solid #ccc;
+            text-align: center;
+            font-size: 8pt;
+            color: #555;
+        }
+        .footer p {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-container">
+        <!-- Шапка компании -->
+        <div class="header">
+            <div class="company-name">ООО НПФ «Роникс-Л»</div>
+            <div class="company-details">
+                ОГРН 1021601978177 | ИНН 1649003743 | КПП 164901001<br>
+                423258, Республика Татарстан, Лениногорский район,<br>
+                город Лениногорск, Крупской ул, д. 4, помещ. 3
+            </div>
+        </div>
+        
+        <!-- Заголовок чека -->
+        <div class="receipt-title">
+            <h1>КАССОВЫЙ ЧЕК</h1>
+            <div class="receipt-number">№ {{ receipt.receipt_number }}</div>
+        </div>
+        
+        <!-- Информация о чеке -->
+        <div class="info-section">
+            <div class="info-row">
+                <div class="info-label">Дата и время:</div>
+                <div class="info-value">{{ receipt.issue_date|date:"d.m.Y в H:i" }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Клиент:</div>
+                <div class="info-value">{{ receipt.order.client.get_full_name|default:receipt.order.client.username }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Заявка:</div>
+                <div class="info-value">№ {{ receipt.order.id }} | {{ receipt.order.get_order_type_display }}</div>
+            </div>
+        </div>
+        
+        <!-- Таблица товаров/услуг -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th class="col-num">№</th>
+                    <th class="col-name">Наименование товара/услуги</th>
+                    <th class="col-qty">Кол-во</th>
+                    <th class="col-price">Цена (₽)</th>
+                    <th class="col-sum">Сумма (₽)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td class="col-num">{{ forloop.counter }}</td>
+                    <td class="col-name">
+                        {{ item.item_name }}
+                        {% if item.component %}
+                            <br><span class="item-article">Артикул: {{ item.component.article_number }}</span>
+                        {% elif item.service %}
+                            <br><span class="item-article">Услуга{% if item.service.name == "Прочее" %} (почасовая оплата){% endif %}</span>
+                        {% endif %}
+                    </td>
+                    <td class="col-qty">
+                        {{ item.quantity }} 
+                        {% if item.service and item.service.name == "Прочее" %}
+                            час{% if item.quantity != 1 %}{% if item.quantity < 5 %}а{% else %}ов{% endif %}{% endif %}
+                        {% else %}
+                            шт.
+                        {% endif %}
+                    </td>
+                    <td class="col-price">{{ item.price|floatformat:2 }}</td>
+                    <td class="col-sum">{{ item.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="4" style="text-align: right; padding-right: 15px;">ИТОГО К ОПЛАТЕ:</td>
+                    <td class="col-sum">{{ receipt.total_amount|floatformat:2 }} ₽</td>
+                </tr>
+            </tfoot>
+        </table>
+        
+        {% if receipt.notes %}
+        <!-- Примечания -->
+        <div class="notes-section">
+            <strong>Примечания:</strong><br>
+            {{ receipt.notes }}
+        </div>
+        {% endif %}
+        
+        <!-- Подвал -->
+        <div class="footer">
+            <p>Данный чек является подтверждением оказания услуг/продажи товаров</p>
+            <p><strong>Контакты:</strong> +7 (XXX) XXX-XX-XX | info@ronix-l.ru | www.ronix-l.ru</p>
+            <p>Спасибо за обращение в ООО НПФ «Роникс-Л»!</p>
+        </div>
+    </div>
+</body>
+</html>

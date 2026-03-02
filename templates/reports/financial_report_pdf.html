@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Финансовый отчет</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 2cm;
+        }
+        
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #198754;
+            padding-bottom: 15px;
+        }
+        
+        .header h1 {
+            font-size: 20pt;
+            margin: 0 0 5px 0;
+            color: #198754;
+        }
+        
+        .header .company {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .header .company-details {
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .header .date {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .stats-section {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #198754;
+        }
+        
+        .stats-section h2 {
+            font-size: 14pt;
+            margin: 0 0 10px 0;
+            color: #198754;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-label {
+            font-weight: bold;
+            color: #666;
+        }
+        
+        .stat-value {
+            color: #198754;
+            font-size: 14pt;
+            font-weight: bold;
+        }
+        
+        .revenue-breakdown {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .revenue-item {
+            background: white;
+            padding: 10px;
+            border-radius: 3px;
+            border-left: 3px solid #0dcaf0;
+        }
+        
+        .revenue-item.components {
+            border-left-color: #ffc107;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 9pt;
+        }
+        
+        th {
+            background-color: #198754;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .badge {
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8pt;
+            font-weight: bold;
+            display: inline-block;
+        }
+        
+        .badge-service {
+            background-color: #0d6efd;
+            color: white;
+        }
+        
+        .badge-components {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        
+        tfoot td {
+            background-color: #e9ecef;
+            font-weight: bold;
+            border-top: 2px solid #198754;
+            padding: 10px 8px;
+        }
+        
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="company">ООО НПФ «Роникс-Л»</div>
+        <div class="company-details">
+            ОГРН: 1021601978177 | ИНН: 1649003743 / КПП: 164901001<br>
+            423258, Республика Татарстан, Лениногорский район, город Лениногорск, Крупской ул, д. 4, помещ. 3
+        </div>
+        <h1>ФИНАНСОВЫЙ ОТЧЕТ</h1>
+        <div class="date">Дата формирования: {{ now|date:"d.m.Y H:i" }}</div>
+        {% if date_from or date_to %}
+        <div class="date">
+            Период: 
+            {% if date_from %}с {{ date_from|date:"d.m.Y" }}{% endif %}
+            {% if date_to %} по {{ date_to|date:"d.m.Y" }}{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="stats-section">
+        <h2>Основные показатели</h2>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-label">Общая выручка:</span>
+                <span class="stat-value">{{ total_revenue|floatformat:2 }} ₽</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Завершено заявок:</span>
+                <span class="stat-value">{{ total_completed }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Средний чек:</span>
+                <span class="stat-value">{{ avg_order_value|floatformat:2 }} ₽</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Период:</span>
+                <span class="stat-value" style="font-size: 10pt;">
+                    {% if date_from or date_to %}
+                        {% if date_from %}{{ date_from|date:"d.m.Y" }}{% endif %}
+                        -
+                        {% if date_to %}{{ date_to|date:"d.m.Y" }}{% endif %}
+                    {% else %}
+                        Все время
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        
+        <div class="revenue-breakdown">
+            <div class="revenue-item">
+                <div class="stat-label">Доход от обслуживания:</div>
+                <div class="stat-value">{{ service_revenue|floatformat:2 }} ₽</div>
+            </div>
+            <div class="revenue-item components">
+                <div class="stat-label">Доход от продажи комплектующих:</div>
+                <div class="stat-value">{{ components_revenue|floatformat:2 }} ₽</div>
+            </div>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">№</th>
+                <th style="width: 12%;">Дата завершения</th>
+                <th style="width: 18%;">Клиент</th>
+                <th style="width: 10%;">Тип</th>
+                <th style="width: 25%;">Описание</th>
+                <th style="width: 18%;">Исполнитель</th>
+                <th style="width: 12%;" class="text-right">Сумма</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td class="text-center"><strong>#{{ order.id }}</strong></td>
+                <td>
+                    {% if order.completed_at %}
+                        {{ order.completed_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>{{ order.client.get_full_name|default:order.client.username }}</td>
+                <td>
+                    {% if order.order_type == 'service' %}
+                        <span class="badge badge-service">Обслуживание</span>
+                    {% else %}
+                        <span class="badge badge-components">Комплектующие</span>
+                    {% endif %}
+                </td>
+                <td style="font-size: 8pt;">{{ order.description|truncatewords:10 }}</td>
+                <td>
+                    {% if order.assigned_to %}
+                        {{ order.assigned_to.get_full_name|default:order.assigned_to.username }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td class="text-right"><strong>{{ order.total_amount|floatformat:2 }} ₽</strong></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center" style="padding: 20px;">
+                    Завершенные заявки за указанный период отсутствуют
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% if orders %}
+        <tfoot>
+            <tr>
+                <td colspan="6" class="text-right">ИТОГО:</td>
+                <td class="text-right" style="color: #198754; font-size: 12pt;">{{ total_revenue|floatformat:2 }} ₽</td>
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
+
+    <div class="footer">
+        <strong>ООО НПФ «Роникс-Л»</strong><br>
+        Телефон: 8 (85595) 5-09-95 | Email: info@roniks-l.ru<br>
+        Отчет сформирован: {{ now|date:"d.m.Y H:i" }}
+    </div>
+</body>
+</html>

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}Чек {{ receipt.receipt_number }} - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Действия сверху -->
+            <div class="d-flex gap-2 justify-content-between mb-3">
+                <a href="{% url 'orders:receipt_list' %}" class="btn btn-outline-primary">
+                    <i class="bi bi-arrow-left"></i> Назад к списку
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{% url 'orders:receipt_pdf' receipt.pk %}" class="btn btn-primary" target="_blank">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </a>
+                    <button onclick="window.print()" class="btn btn-outline-secondary">
+                        <i class="bi bi-printer"></i> Печать
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Сам чек -->
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <!-- Шапка компании -->
+                    <div class="text-center border-bottom pb-3 mb-4">
+                        <h4 class="fw-bold mb-1">ООО НПФ «Роникс-Л»</h4>
+                        <div class="small text-muted">
+                            <div>ОГРН 1021601978177 | ИНН 1649003743 | КПП 164901001</div>
+                            <div>423258, Республика Татарстан, г. Лениногорск, ул. Крупской, д. 4, помещ. 3</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Заголовок чека -->
+                    <div class="text-center mb-4">
+                        <h5 class="fw-bold mb-0">КАССОВЫЙ ЧЕК</h5>
+                        <div class="text-muted">№ <span class="text-dark fw-bold">{{ receipt.receipt_number }}</span></div>
+                    </div>
+                    
+                    <!-- Информация о чеке -->
+                    <table class="table table-sm table-borderless mb-4">
+                        <tbody>
+                            <tr>
+                                <td class="fw-bold" style="width: 200px;">Дата и время:</td>
+                                <td>{{ receipt.issue_date|date:"d.m.Y в H:i" }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Клиент:</td>
+                                <td>{{ receipt.order.client.get_full_name|default:receipt.order.client.username }}</td>
+                            </tr>
+                            <tr>
+                                <td class="fw-bold">Заявка:</td>
+                                <td>№ {{ receipt.order.id }} | {{ receipt.order.get_order_type_display }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Товары/услуги -->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 40px;" class="text-center">№</th>
+                                    <th>Наименование товара/услуги</th>
+                                    <th style="width: 100px;" class="text-end">Кол-во</th>
+                                    <th style="width: 120px;" class="text-end">Цена (₽)</th>
+                                    <th style="width: 120px;" class="text-end">Сумма (₽)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td class="text-center">{{ forloop.counter }}</td>
+                                    <td>
+                                        {{ item.item_name }}
+                                        {% if item.component %}
+                                            <br><small class="text-muted">Артикул: {{ item.component.article_number }}</small>
+                                        {% elif item.service %}
+                                            <br><small class="text-muted">Услуга{% if item.service.name == "Прочее" %} (почасовая оплата){% endif %}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        {{ item.quantity }} 
+                                        {% if item.service and item.service.name == "Прочее" %}
+                                            час{% if item.quantity != 1 %}ов{% endif %}
+                                        {% else %}
+                                            шт.
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">{{ item.price|floatformat:2 }}</td>
+                                    <td class="text-end">{{ item.subtotal|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="4" class="text-end fw-bold fs-5">ИТОГО К ОПЛАТЕ:</td>
+                                    <td class="text-end fw-bold fs-4 text-success">{{ receipt.total_amount|floatformat:2 }} ₽</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    {% if receipt.notes %}
+                    <div class="alert alert-warning mb-4">
+                        <strong><i class="bi bi-info-circle"></i> Примечания:</strong><br>
+                        {{ receipt.notes }}
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Подвал -->
+                    <div class="text-center border-top pt-3 small text-muted">
+                        <p class="mb-1">Данный чек является подтверждением оказания услуг/продажи товаров</p>
+                        <p class="mb-1"><strong>Контакты:</strong> +7 (XXX) XXX-XX-XX | info@ronix-l.ru | www.ronix-l.ru</p>
+                        <p class="mb-0">Спасибо за обращение в ООО НПФ «Роникс-Л»!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, nav, footer, .breadcrumb { display: none !important; }
+    .card { box-shadow: none !important; border: none !important; }
+    body { background: white !important; }
+}
+</style>
+{% endblock %}

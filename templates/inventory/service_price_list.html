@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Прайс-лист услуг - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-tools"></i> Прайс-лист услуг
+            </h1>
+            <p class="lead">Актуальные цены на услуги и работы</p>
+        </div>
+    </div>
+    
+    <!-- Поиск и фильтры -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Поиск услуг..." value="{{ search }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="category" class="form-select">
+                        <option value="">Все категории</option>
+                        {% for cat_value, cat_name in categories %}
+                            <option value="{{ cat_value }}" {% if selected_category == cat_value %}selected{% endif %}>
+                                {{ cat_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Найти
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Список услуг -->
+    {% if services %}
+        {% regroup services by category as services_by_category %}
+        
+        {% for category_group in services_by_category %}
+            <div class="card mb-4">
+                <div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 2px solid #dee2e6;">
+                    <h4 class="mb-0" style="color: #1a1a1a;">
+                        <i class="bi bi-wrench-adjustable-circle"></i> 
+                        {{ category_group.grouper|capfirst }}
+                        <span class="badge" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white;">
+                            {{ category_group.list|length }}
+                        </span>
+                    </h4>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">Название услуги</th>
+                                    <th>Описание</th>
+                                    <th style="width: 120px;">Длительность</th>
+                                    <th style="width: 150px;" class="text-end">Цена</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for service in category_group.list %}
+                                    <tr>
+                                        <td>
+                                            <strong style="font-size: 1.05rem;">{{ service.name }}</strong>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ service.description|default:"—"|truncatewords:15 }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-clock"></i> {{ service.duration }} мин
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong style="font-size: 1.3rem; color: #2c3e50; font-weight: 700;">
+                                                {{ service.price }} ₽
+                                            </strong>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-inbox" style="font-size: 4rem; color: #6c757d; opacity: 0.5;"></i>
+                <p class="text-muted mt-3">Услуги не найдены</p>
+            </div>
+        </div>
+    {% endif %}
+    
+    <!-- Информация для клиентов -->
+    <div class="alert mt-4" style="background: #f8f9fa; border: 1px solid #dee2e6; border-left: 4px solid #2c3e50; color: #495057;">
+        <h5 style="color: #1a1a1a;"><i class="bi bi-info-circle-fill me-2" style="color: #2c3e50;"></i>Как заказать услугу</h5>
+        <ul class="mb-0" style="line-height: 1.8;">
+            <li>Для оформления заказа необходимо <a href="{% url 'users:register' %}" style="color: #2c3e50; font-weight: 600; text-decoration: none; border-bottom: 1px solid #2c3e50;">зарегистрироваться</a> или <a href="{% url 'users:login' %}" style="color: #2c3e50; font-weight: 600; text-decoration: none; border-bottom: 1px solid #2c3e50;">войти</a> в систему</li>
+            <li>После авторизации создайте заявку, выбрав тип "Обслуживание"</li>
+            <li>Укажите желаемую услугу в описании заявки</li>
+            <li>Наши специалисты свяжутся с вами для уточнения деталей</li>
+            <li>Указанные цены являются базовыми и могут варьироваться в зависимости от сложности работы</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+/* Анимация при наведении на строку */
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background: #f8f9fa !important;
+    transform: translateX(5px);
+    box-shadow: -3px 0 0 0 #2c3e50;
+}
+
+/* Кастомные стили для таблицы */
+.table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.8px;
+    color: #1a1a1a;
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 1rem;
+    color: #495057;
+}
+
+.table tbody td strong {
+    color: #1a1a1a;
+}
+
+/* Hover эффект для ссылок */
+a[style*="border-bottom"]:hover {
+    color: #1a1a1a !important;
+    border-bottom-color: #1a1a1a !important;
+}
+</style>
+{% endblock %}

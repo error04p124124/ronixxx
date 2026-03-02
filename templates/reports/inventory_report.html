@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Отчет по складу - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-box-seam"></i> Отчет по складу
+            </h1>
+            {% if date_from or date_to %}
+            <p class="text-muted">
+                Период: 
+                {% if date_from %}с {{ date_from }}{% endif %}
+                {% if date_to %}по {{ date_to }}{% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Всего позиций</h6>
+                    <p class="stat-value">{{ total_components }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Низкий остаток</h6>
+                    <p class="stat-value text-warning">{{ low_stock_components }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Отсутствует</h6>
+                    <p class="stat-value text-danger">{{ out_of_stock }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Общая стоимость</h6>
+                    <p class="stat-value text-success">{{ total_value|floatformat:2 }} ₽</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Таблица -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Детализация</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Артикул</th>
+                            <th>Название</th>
+                            <th>Категория</th>
+                            <th>Количество</th>
+                            <th>Цена</th>
+                            <th>Сумма</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for component in components %}
+                            <tr>
+                                <td><code>{{ component.obj.article_number }}</code></td>
+                                <td>{{ component.obj.name }}</td>
+                                <td>{{ component.obj.category.name }}</td>
+                                <td>{{ component.obj.quantity }}</td>
+                                <td>{{ component.obj.price }} ₽</td>
+                                <td>{{ component.total|floatformat:2 }} ₽</td>
+                                <td>
+                                    <span class="badge {% if component.obj.quantity == 0 %}bg-danger{% elif component.obj.is_low_stock %}bg-warning{% else %}bg-success{% endif %}">
+                                        {{ component.obj.stock_status }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

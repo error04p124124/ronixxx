@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero секция -->
+    <div class="row align-items-center min-vh-75 py-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">
+                Система управления запасами и комплектующими
+            </h1>
+            <p class="lead mb-4">
+                ООО НПФ «Роникс-Л» предоставляет современное решение для управления складом, 
+                обработки заявок и ведения учёта комплектующих.
+            </p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'core:dashboard' %}" class="btn btn-primary btn-lg me-2">
+                    <i class="bi bi-speedometer2"></i> Перейти к панели управления
+                </a>
+            {% else %}
+                <a href="{% url 'users:login' %}" class="btn btn-primary btn-lg me-2">
+                    <i class="bi bi-box-arrow-in-right"></i> Войти
+                </a>
+                <a href="{% url 'users:register' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-person-plus"></i> Регистрация
+                </a>
+            {% endif %}
+        </div>
+        <div class="col-lg-6">
+            <div class="text-center" style="position: relative; z-index: 1;">
+                <i class="bi bi-gear-fill" style="font-size: 25rem; color: var(--primary); opacity: 0.15;"></i>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Возможности системы -->
+    <div class="row py-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-6 fw-bold">Возможности системы</h2>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-box-seam text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="card-title mt-3">Управление складом</h4>
+                    <p class="card-text">
+                        Полный контроль над запасами, отслеживание остатков и автоматические уведомления 
+                        о низком уровне товаров.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-clipboard-check text-success" style="font-size: 3rem;"></i>
+                    <h4 class="card-title mt-3">Заявки и заказы</h4>
+                    <p class="card-text">
+                        Удобная система создания и отслеживания заявок на обслуживание и 
+                        заказы комплектующих.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-file-earmark-text text-info" style="font-size: 3rem;"></i>
+                    <h4 class="card-title mt-3">Отчётность</h4>
+                    <p class="card-text">
+                        Формирование детальных отчётов по складу, финансам и выполненным работам 
+                        с возможностью экспорта в PDF.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Роли пользователей -->
+    <div class="row py-5 my-5" style="background: #f8f9fa; border-radius: 24px; border: 1px solid rgba(0, 0, 0, 0.08);">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold mb-2" style="color: #2c3e50;">
+                Роли пользователей
+            </h2>
+            <p class="lead text-secondary">Выберите роль, которая соответствует вашим потребностям</p>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card h-100" style="background: #ffffff; backdrop-filter: blur(10px); border: 1px solid rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-4" style="font-size: 4rem; color: #2c3e50;">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mb-4" style="color: #2c3e50; font-size: 1.5rem;">Клиент</h5>
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #2c3e50;"></i> 
+                            Просмотр своих заявок
+                        </li>
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #2c3e50;"></i> 
+                            Создание новых заявок
+                        </li>
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #2c3e50;"></i> 
+                            Получение чеков
+                        </li>
+                    </ul>
+                    <div class="mt-4">
+                        <span class="badge" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); padding: 0.5rem 1.5rem; font-size: 0.9rem;">
+                            Базовый доступ
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card h-100" style="background: #ffffff; backdrop-filter: blur(10px); border: 1px solid rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+                <div class="card-body text-center p-4">
+                    <div class="mb-4" style="font-size: 4rem; color: #6c757d;">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <h5 class="card-title fw-bold mb-4" style="color: #2c3e50; font-size: 1.5rem;">Работник</h5>
+                    <ul class="list-unstyled text-start">
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #6c757d;"></i> 
+                            Управление запасами
+                        </li>
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #6c757d;"></i> 
+                            Обработка заявок
+                        </li>
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #6c757d;"></i> 
+                            Формирование отчётов
+                        </li>
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #6c757d;"></i> 
+                            Управление пользователями
+                        </li>
+                        <li class="mb-3 text-secondary">
+                            <i class="bi bi-check-circle-fill me-2" style="color: #6c757d;"></i> 
+                            Полный доступ к системе
+                        </li>
+                    </ul>
+                    <div class="mt-4">
+                        <span class="badge" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); padding: 0.5rem 1.5rem; font-size: 0.9rem;">
+                            Полный доступ
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% block title %}Отчет по заявкам - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-clipboard-check"></i> Отчет по заявкам
+            </h1>
+            {% if date_from or date_to %}
+            <p class="text-muted">
+                Период: 
+                {% if date_from %}с {{ date_from }}{% endif %}
+                {% if date_to %}по {{ date_to }}{% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Статистика по статусам -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Всего заявок</h6>
+                    <p class="stat-value">{{ total_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Новые</h6>
+                    <p class="stat-value text-info">{{ new_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">В работе</h6>
+                    <p class="stat-value text-warning">{{ in_progress_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Завершенные</h6>
+                    <p class="stat-value text-success">{{ completed_orders }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика по типам -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Обслуживание</h6>
+                    <p class="stat-value">{{ service_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Заказ комплектующих</h6>
+                    <p class="stat-value">{{ component_orders }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Отмененные</h6>
+                    <p class="stat-value text-danger">{{ cancelled_orders }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Таблица заявок -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Детализация заявок</h5>
+            <div>
+                {% if date_from or date_to %}
+                    <small class="text-muted">
+                        Период: 
+                        {% if date_from %}с {{ date_from|date:"d.m.Y" }}{% endif %}
+                        {% if date_to %}по {{ date_to|date:"d.m.Y" }}{% endif %}
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Дата создания</th>
+                            <th>Клиент</th>
+                            <th>Тип заявки</th>
+                            <th>Описание</th>
+                            <th>Статус</th>
+                            <th>Исполнитель</th>
+                            <th>Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ order.client.get_full_name|default:order.client.username }}</td>
+                                <td>
+                                    {% if order.order_type == 'service' %}
+                                        <span class="badge bg-primary">Обслуживание</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Комплектующие</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ order.description|truncatewords:10 }}</small>
+                                </td>
+                                <td>
+                                    {% if order.status == 'new' %}
+                                        <span class="badge bg-secondary">Новая</span>
+                                    {% elif order.status == 'in_progress' %}
+                                        <span class="badge bg-warning text-dark">В работе</span>
+                                    {% elif order.status == 'completed' %}
+                                        <span class="badge bg-success">Выполнена</span>
+                                    {% elif order.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Отменена</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if order.assigned_to %}
+                                        {{ order.assigned_to.get_full_name|default:order.assigned_to.username }}
+                                    {% else %}
+                                        <span class="text-muted">Не назначен</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ order.total_amount|floatformat:2 }} ₽</strong></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted">
+                                    <i class="bi bi-inbox"></i> Заявки отсутствуют
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+</style>
+{% endblock %}

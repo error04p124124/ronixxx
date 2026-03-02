@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Завершение заявки - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-sm border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-check-circle"></i> Завершение заявки
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-success">
+                        <i class="bi bi-info-circle-fill"></i>
+                        <strong>Вы собираетесь отметить заявку как выполненную</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Номер заявки:</strong> #{{ order.id }}<br>
+                        <strong>Клиент:</strong> {{ order.client.get_full_name|default:order.client.username }}<br>
+                        <strong>Тип:</strong> {{ order.get_order_type_display }}<br>
+                        <strong>Сумма:</strong> {{ order.total_amount }} ₽<br>
+                    </div>
+                    
+                    <p class="text-muted">
+                        После завершения заявки будет автоматически сформирован чек.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Завершить заявку
+                            </button>
+                            <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if category %}Редактирование{% else %}Добавление{% endif %} категории - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.08);">
+                <div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 2px solid #dee2e6;">
+                    <h3 class="mb-0" style="color: #1a1a1a;">
+                        {% if category %}
+                            <i class="bi bi-pencil"></i> Редактирование категории
+                        {% else %}
+                            <i class="bi bi-plus-circle"></i> Добавление категории
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body p-4" style="background: #ffffff;">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.name.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">Название:</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                                <div class="text-danger mt-1">{{ form.name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">Описание:</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; border: none; padding: 0.625rem 1.5rem; font-weight: 500;">
+                                <i class="bi bi-check-circle"></i> Сохранить
+                            </button>
+                            <a href="{% url 'inventory:category_list' %}" class="btn btn-outline-secondary" style="border-color: #6c757d; color: #495057; font-weight: 500;">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

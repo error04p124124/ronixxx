@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Прайс-лист - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-tag-fill"></i> Прайс-лист комплектующих
+            </h1>
+            <p class="lead">Актуальные цены на товары в наличии</p>
+        </div>
+    </div>
+    
+    <!-- Поиск и фильтры -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <input type="text" name="search" class="form-control" placeholder="Поиск по названию, артикулу или производителю..." value="{{ search }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="category" class="form-select">
+                        <option value="">Все категории</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Найти
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Таблица прайс-листа -->
+    <div class="card">
+        <div class="card-body">
+            {% if components %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Изображение</th>
+                                <th>Название</th>
+                                <th>Артикул</th>
+                                <th>Категория</th>
+                                <th>Производитель</th>
+                                <th>Количество</th>
+                                <th style="min-width: 120px;">Цена</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for component in components %}
+                                <tr>
+                                    <td>
+                                        {% if component.image %}
+                                            <img src="{{ component.image.url }}" alt="{{ component.name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                        {% else %}
+                                            <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-box-seam" style="color: white; font-size: 1.5rem;"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <strong>{{ component.name }}</strong>
+                                        {% if component.description %}
+                                            <br><small class="text-muted">{{ component.description|truncatewords:10 }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td><code>{{ component.article_number }}</code></td>
+                                    <td>
+                                        <span class="badge bg-info">{{ component.category.name }}</span>
+                                    </td>
+                                    <td>{{ component.manufacturer|default:"—" }}</td>
+                                    <td>
+                                        <span class="badge {% if component.is_low_stock %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                            {{ component.quantity }} шт.
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <strong style="font-size: 1.2rem; color: var(--neon-blue);">{{ component.price }} ₽</strong>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: var(--text-muted);"></i>
+                    <p class="text-muted mt-3">Комплектующие не найдены</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Информация для клиентов -->
+    <div class="alert alert-info mt-4" style="background: rgba(79, 172, 254, 0.1); border: 1px solid rgba(79, 172, 254, 0.3);">
+        <h5><i class="bi bi-info-circle-fill me-2"></i>Информация для клиентов</h5>
+        <ul class="mb-0">
+            <li>Цены указаны за единицу товара</li>
+            <li>Для оформления заказа необходимо <a href="{% url 'users:register' %}">зарегистрироваться</a> или <a href="{% url 'users:login' %}">войти</a> в систему</li>
+            <li>После регистрации вы сможете создавать заявки на покупку комплектующих</li>
+            <li>Цены автоматически рассчитываются при создании заявки</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

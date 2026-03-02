@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в аккаунт</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .info-box {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #6c757d;
+            border-radius: 3px;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="margin: 0;">🔐 Уведомление о входе</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">ООО НПФ «Роникс-Л»</p>
+    </div>
+    
+    <div class="content">
+        <p>Здравствуйте, <strong>{{ user.get_full_name|default:user.username }}</strong>!</p>
+        
+        <p>Был выполнен вход в ваш аккаунт. Если это были вы, можете проигнорировать это письмо.</p>
+        
+        <div class="info-box">
+            <p style="margin: 5px 0;"><strong>Дата и время:</strong> {{ user.last_login|date:"d.m.Y H:i" }}</p>
+            <p style="margin: 5px 0;"><strong>IP-адрес:</strong> {{ ip_address }}</p>
+            <p style="margin: 5px 0;"><strong>Браузер:</strong> {{ user_agent|truncatewords:10 }}</p>
+        </div>
+        
+        <p>⚠️ <strong>Если это были не вы</strong>, немедленно свяжитесь с администратором и смените пароль.</p>
+        
+        <div class="footer">
+            <p>Это автоматическое уведомление. Пожалуйста, не отвечайте на это письмо.</p>
+            <p>© 2026 ООО НПФ «Роникс-Л»</p>
+        </div>
+    </div>
+</body>
+</html>

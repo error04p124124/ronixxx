@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+
+{% block title %}Финансовый отчет - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-cash-stack"></i> Финансовый отчет
+            </h1>
+            {% if date_from or date_to %}
+            <p class="text-muted">
+                Период: 
+                {% if date_from %}с {{ date_from }}{% endif %}
+                {% if date_to %}по {{ date_to }}{% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Основная статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card border-success">
+                <div class="card-body">
+                    <h6 class="text-muted">Общая выручка</h6>
+                    <p class="stat-value text-success">{{ total_revenue|floatformat:2 }} ₽</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Завершено заявок</h6>
+                    <p class="stat-value">{{ total_completed }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card border-primary">
+                <div class="card-body">
+                    <h6 class="text-muted">Средний чек</h6>
+                    <p class="stat-value text-primary">{{ avg_order_value|floatformat:2 }} ₽</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Период</h6>
+                    <p class="stat-value" style="font-size: 1rem;">
+                        {% if date_from or date_to %}
+                            {% if date_from %}с {{ date_from|date:"d.m.Y" }}{% endif %}
+                            {% if date_to %}<br>по {{ date_to|date:"d.m.Y" }}{% endif %}
+                        {% else %}
+                            Все время
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Выручка по типам услуг -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card stat-card border-info">
+                <div class="card-body">
+                    <h6 class="text-muted">Доход от обслуживания</h6>
+                    <p class="stat-value text-info">{{ service_revenue|floatformat:2 }} ₽</p>
+                    <small class="text-muted">
+                        {{ service_revenue|floatformat:0|default:"0" }} ₽ / {{ total_revenue|floatformat:0|default:"1" }} ₽ = 
+                        {% widthratio service_revenue total_revenue 100 %}%
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card stat-card border-warning">
+                <div class="card-body">
+                    <h6 class="text-muted">Доход от продажи комплектующих</h6>
+                    <p class="stat-value text-warning">{{ components_revenue|floatformat:2 }} ₽</p>
+                    <small class="text-muted">
+                        {{ components_revenue|floatformat:0|default:"0" }} ₽ / {{ total_revenue|floatformat:0|default:"1" }} ₽ = 
+                        {% widthratio components_revenue total_revenue 100 %}%
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Таблица заявок -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Детализация завершенных заявок</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            <th>Дата завершения</th>
+                            <th>Клиент</th>
+                            <th>Тип заявки</th>
+                            <th>Описание</th>
+                            <th>Исполнитель</th>
+                            <th class="text-end">Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                <td>
+                                    {% if order.completed_at %}
+                                        {{ order.completed_at|date:"d.m.Y H:i" }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.client.get_full_name|default:order.client.username }}</td>
+                                <td>
+                                    {% if order.order_type == 'service' %}
+                                        <span class="badge bg-primary">Обслуживание</span>
+                                    {% else %}
+                                        <span class="badge bg-info">Комплектующие</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <small>{{ order.description|truncatewords:8 }}</small>
+                                </td>
+                                <td>
+                                    {% if order.assigned_to %}
+                                        {{ order.assigned_to.get_full_name|default:order.assigned_to.username }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end"><strong>{{ order.total_amount|floatformat:2 }} ₽</strong></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center text-muted">
+                                    <i class="bi bi-inbox"></i> Завершенные заявки отсутствуют
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if orders %}
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="6" class="text-end"><strong>ИТОГО:</strong></td>
+                            <td class="text-end"><strong class="text-success">{{ total_revenue|floatformat:2 }} ₽</strong></td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Аналитика -->
+    {% if total_completed > 0 %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> Анализ и выводы</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success"></i>
+                            За отчетный период завершено <strong>{{ total_completed }}</strong> заявок на общую сумму <strong>{{ total_revenue|floatformat:2 }} ₽</strong>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-cash text-primary"></i>
+                            Средний чек составляет <strong>{{ avg_order_value|floatformat:2 }} ₽</strong>
+                        </li>
+                        {% if service_revenue > 0 %}
+                        <li class="mb-2">
+                            <i class="bi bi-tools text-info"></i>
+                            Доход от сервисного обслуживания: <strong>{{ service_revenue|floatformat:2 }} ₽</strong> 
+                            ({% widthratio service_revenue total_revenue 100 %}% от общей выручки)
+                        </li>
+                        {% endif %}
+                        {% if components_revenue > 0 %}
+                        <li class="mb-2">
+                            <i class="bi bi-box-seam text-warning"></i>
+                            Доход от продажи комплектующих: <strong>{{ components_revenue|floatformat:2 }} ₽</strong>
+                            ({% widthratio components_revenue total_revenue 100 %}% от общей выручки)
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.stat-card {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.border-success {
+    border-left: 4px solid #198754 !important;
+}
+
+.border-primary {
+    border-left: 4px solid #0d6efd !important;
+}
+
+.border-info {
+    border-left: 4px solid #0dcaf0 !important;
+}
+
+.border-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+</style>
+{% endblock %}

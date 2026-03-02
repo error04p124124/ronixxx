@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление заявки - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Удаление заявки
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Вы уверены, что хотите удалить эту заявку?</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Номер заявки:</strong> #{{ order.id }}<br>
+                        <strong>Тип:</strong> {{ order.get_order_type_display }}<br>
+                        <strong>Статус:</strong> {{ order.get_status_display }}<br>
+                        <strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}<br>
+                    </div>
+                    
+                    <p class="text-muted">
+                        Это действие нельзя отменить. Все связанные позиции также будут удалены.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Да, удалить
+                            </button>
+                            <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

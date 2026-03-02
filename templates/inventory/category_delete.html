@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Удаление категории - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> Удаление категории
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Вы уверены, что хотите удалить эту категорию?</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Название:</strong> {{ category.name }}<br>
+                        <strong>Описание:</strong> {{ category.description|default:"—" }}<br>
+                    </div>
+                    
+                    <p class="text-muted">
+                        Внимание! Удаление категории также удалит все связанные с ней комплектующие.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Да, удалить
+                            </button>
+                            <a href="{% url 'inventory:category_list' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

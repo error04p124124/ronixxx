@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новая заявка</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .order-box {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #6c757d;
+            border-radius: 3px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .status-new {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="margin: 0;">📋 Новая заявка</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">ООО НПФ «Роникс-Л»</p>
+    </div>
+    
+    <div class="content">
+        <p>Поступила новая заявка в систему!</p>
+        
+        <div class="order-box">
+            <h3 style="margin-top: 0; color: #2c3e50;">Заявка №{{ order.id }}</h3>
+            
+            <p style="margin: 8px 0;">
+                <strong>Статус:</strong> 
+                <span class="status-badge status-new">{{ order.get_status_display }}</span>
+            </p>
+            
+            <p style="margin: 8px 0;">
+                <strong>Клиент:</strong> {{ order.client.get_full_name|default:order.client.username }}
+            </p>
+            
+            {% if order.client.email %}
+            <p style="margin: 8px 0;">
+                <strong>Email клиента:</strong> {{ order.client.email }}
+            </p>
+            {% endif %}
+            
+            {% if order.client.phone %}
+            <p style="margin: 8px 0;">
+                <strong>Телефон клиента:</strong> {{ order.client.phone }}
+            </p>
+            {% endif %}
+            
+            <p style="margin: 8px 0;">
+                <strong>Тип заявки:</strong> {{ order.get_order_type_display }}
+            </p>
+            
+            <p style="margin: 8px 0;">
+                <strong>Дата создания:</strong> {{ order.created_at|date:"d.m.Y H:i" }}
+            </p>
+            
+            {% if order.description %}
+            <p style="margin: 8px 0;">
+                <strong>Описание:</strong><br>
+                {{ order.description|linebreaks }}
+            </p>
+            {% endif %}
+        </div>
+        
+        <p>⚡ Зайдите в систему для назначения ответственного и обработки заявки.</p>
+        
+        <div class="footer">
+            <p>Это автоматическое уведомление. Пожалуйста, не отвечайте на это письмо.</p>
+            <p>© 2026 ООО НПФ «Роникс-Л»</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}Заявки - ООО НПФ «Роникс-Л»{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-clipboard-check"></i> Заявки
+            </h1>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Список заявок</h5>
+            <a href="{% url 'orders:order_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Создать заявку
+            </a>
+        </div>
+        <div class="card-body">
+            <!-- Фильтры по статусу -->
+            <div class="mb-3">
+                <a href="?" class="btn btn-sm btn-outline-secondary">Все</a>
+                <a href="?status=new" class="btn btn-sm btn-outline-info">Новые</a>
+                <a href="?status=in_progress" class="btn btn-sm btn-outline-warning">В работе</a>
+                <a href="?status=completed" class="btn btn-sm btn-outline-success">Выполнено</a>
+                <a href="?status=cancelled" class="btn btn-sm btn-outline-danger">Отменено</a>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>№</th>
+                            {% if not user.is_client %}
+                                <th>Клиент</th>
+                            {% endif %}
+                            <th>Тип</th>
+                            <th>Описание</th>
+                            <th>Статус</th>
+                            {% if not user.is_client %}
+                                <th>Ответственный</th>
+                            {% endif %}
+                            <th>Сумма</th>
+                            <th>Дата создания</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td><strong>#{{ order.id }}</strong></td>
+                                {% if not user.is_client %}
+                                    <td>{{ order.client.get_full_name|default:order.client.username }}</td>
+                                {% endif %}
+                                <td>{{ order.get_order_type_display }}</td>
+                                <td>{{ order.description|truncatewords:10 }}</td>
+                                <td>
+                                    {% if order.status == 'new' %}
+                                        <span class="badge bg-info">{{ order.get_status_display }}</span>
+                                    {% elif order.status == 'in_progress' %}
+                                        <span class="badge bg-warning">{{ order.get_status_display }}</span>
+                                    {% elif order.status == 'completed' %}
+                                        <span class="badge bg-success">{{ order.get_status_display }}</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">{{ order.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                                {% if not user.is_client %}
+                                    <td>
+                                        {% if order.assigned_to %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-person-check"></i>
+                                                {{ order.assigned_to.get_full_name|default:order.assigned_to.username }}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-person-x"></i> Не назначен
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                                <td>{{ order.total_amount }} ₽</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> Подробнее
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="{% if user.is_client %}6{% else %}8{% endif %}" class="text-center text-muted">
+                                    Нет заявок
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

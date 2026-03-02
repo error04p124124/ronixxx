@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Низкий остаток товара</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            background: #f8f9fa;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .alert-box {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #dc3545;
+            border-radius: 3px;
+        }
+        .component-box {
+            background: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #6c757d;
+            border-radius: 3px;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        strong {
+            color: #2c3e50;
+        }
+        .stock-warning {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2 style="margin: 0;">⚠️ Низкий остаток товара</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.9;">ООО НПФ «Роникс-Л»</p>
+    </div>
+    
+    <div class="content">
+        <div class="alert-box">
+            <p style="margin: 0;"><strong>⚠️ ВНИМАНИЕ!</strong> Товар на складе заканчивается!</p>
+        </div>
+        
+        <div class="component-box">
+            <h3 style="margin-top: 0; color: #2c3e50;">{{ component.name }}</h3>
+            
+            <p style="margin: 8px 0;">
+                <strong>Артикул:</strong> {{ component.article_number }}
+            </p>
+            
+            <p style="margin: 8px 0;">
+                <strong>Категория:</strong> {{ component.category.name }}
+            </p>
+            
+            {% if component.manufacturer %}
+            <p style="margin: 8px 0;">
+                <strong>Производитель:</strong> {{ component.manufacturer }}
+            </p>
+            {% endif %}
+            
+            <p style="margin: 8px 0;">
+                <strong>Текущий остаток:</strong> 
+                <span class="stock-warning">{{ component.quantity }} шт.</span>
+            </p>
+            
+            <p style="margin: 8px 0;">
+                <strong>Минимальный остаток:</strong> {{ component.min_quantity }} шт.
+            </p>
+            
+            {% if component.price %}
+            <p style="margin: 8px 0;">
+                <strong>Цена:</strong> {{ component.price }} ₽
+            </p>
+            {% endif %}
+        </div>
+        
+        {% if component.quantity == 0 %}
+        <div class="alert-box">
+            <p style="margin: 0;"><strong>🚫 ТОВАР ОТСУТСТВУЕТ НА СКЛАДЕ!</strong></p>
+            <p style="margin: 5px 0 0 0;">Необходимо срочно заказать новую партию.</p>
+        </div>
+        {% else %}
+        <p>📦 Рекомендуется оформить заказ поставки для пополнения запасов.</p>
+        {% endif %}
+        
+        <p>💡 Зайдите в систему для оформления заказа у поставщика.</p>
+        
+        <div class="footer">
+            <p>Это автоматическое уведомление. Пожалуйста, не отвечайте на это письмо.</p>
+            <p>© 2026 ООО НПФ «Роникс-Л»</p>
+        </div>
+    </div>
+</body>
+</html>

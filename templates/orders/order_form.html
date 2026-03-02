@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if order %}Редактирование заявки{% else %}Создание заявки{% endif %} - ООО НПФ «Роникс-Л»
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm" style="border: 1px solid rgba(0, 0, 0, 0.08);">
+                <div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 2px solid #dee2e6;">
+                    <h3 class="mb-0" style="color: #1a1a1a;">
+                        {% if order %}
+                            <i class="bi bi-pencil"></i> Редактирование заявки #{{ order.id }}
+                        {% else %}
+                            <i class="bi bi-plus-circle"></i> Создание новой заявки
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body p-4" style="background: #ffffff;">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.status %}
+                            <div class="mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">Статус:</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="text-danger mt-1">{{ form.status.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        {% if form.assigned_to %}
+                            <div class="mb-3">
+                                <label for="{{ form.assigned_to.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">Ответственный:</label>
+                                {{ form.assigned_to }}
+                                {% if form.assigned_to.errors %}
+                                    <div class="text-danger mt-1">{{ form.assigned_to.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Выберите работника или управляющего для выполнения заявки
+                                </small>
+                            </div>
+                        {% endif %}
+                        
+                        {% if form.order_type %}
+                            <div class="mb-3">
+                                <label for="{{ form.order_type.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">Тип заявки:</label>
+                                {{ form.order_type }}
+                                {% if form.order_type.errors %}
+                                    <div class="text-danger mt-1">{{ form.order_type.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold" style="color: #2c3e50;">Описание заявки:</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Опишите подробно суть вашей заявки
+                            </small>
+                        </div>
+                        
+                        {% if not order %}
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                После создания заявки, работник сервисного центра свяжется с вами для уточнения деталей.
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn" style="background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; border: none; padding: 0.625rem 1.5rem; font-weight: 500;">
+                                <i class="bi bi-check-circle"></i> 
+                                {% if order %}Сохранить изменения{% else %}Создать заявку{% endif %}
+                            </button>
+                            <a href="{% if order %}{% url 'orders:order_detail' order.pk %}{% else %}{% url 'orders:order_list' %}{% endif %}" class="btn btn-outline-secondary" style="border-color: #6c757d; color: #495057; font-weight: 500;">
+                                <i class="bi bi-x-circle"></i> Отмена
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
